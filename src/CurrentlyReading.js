@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { update } from "./BooksAPI"
 
 class CurrentlyReading extends Component {
 
     static propTypes = {
         books : PropTypes.array.isRequired
+    }
+
+    updateShelf = (book, shelf) => {
+        console.log("Shelf: ", shelf);
+        console.log("Book: ", book);
+
+        update(book, shelf).then((res) => console.log(res))
     }
 
     render() {
@@ -21,7 +29,7 @@ class CurrentlyReading extends Component {
                                     <div className="book-top">
                                         <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
                                         <div className="book-shelf-changer">
-                                            <select>
+                                            <select onChange={(event) => this.updateShelf(book, event.target.value)}>
                                                 <option value="none" disabled>Move to...</option>
                                                 <option value="currentlyReading">Currently Reading</option>
                                                 <option value="wantToRead">Want to Read</option>
