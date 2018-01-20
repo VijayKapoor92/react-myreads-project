@@ -1,22 +1,16 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { update } from "./BooksAPI"
+
 
 class CurrentlyReading extends Component {
 
     static propTypes = {
-        books : PropTypes.array.isRequired
-    }
-
-    updateShelf = (book, shelf) => {
-        console.log("Shelf: ", shelf);
-        console.log("Book: ", book);
-
-        update(book, shelf).then((res) => console.log(res))
+        books : PropTypes.array.isRequired,
+        onChangeShelf: PropTypes.func.isRequired
     }
 
     render() {
-        const { books } = this.props;
+        const { books, onChangeShelf } = this.props;
 
         return (
             <div className="bookshelf">
@@ -29,7 +23,7 @@ class CurrentlyReading extends Component {
                                     <div className="book-top">
                                         <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail})` }}></div>
                                         <div className="book-shelf-changer">
-                                            <select value={book.shelf} onChange={(event) => this.updateShelf(book, event.target.value)}>
+                                            <select value={book.shelf} onChange={(event) => onChangeShelf(book, event.target.value)}>
                                                 <option value="none" disabled>Move to...</option>
                                                 <option value="currentlyReading">Currently Reading</option>
                                                 <option value="wantToRead">Want to Read</option>

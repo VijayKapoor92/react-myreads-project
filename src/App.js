@@ -9,14 +9,29 @@ import './App.css'
 class App extends React.Component {
 
     componentDidMount(){
-        BooksAPI.getAll().then((books) =>{
-            this.setState({ books })
-        })
+        this.setBooks();
     }
 
     state = {
       books : []
-    }
+    };
+
+    setBooks = () => {
+        BooksAPI.getAll().then((books) =>{
+            this.setState({ books });
+        });
+    };
+
+    updateShelf = (book, shelf) => {
+        this.setState((state) => ({
+            books: state.books.filter((b) => b.id !== book.id)
+        }));
+
+        BooksAPI.update(book, shelf).then((res) => {
+            console.log(`O livro ${book.title} foi para a estante ${shelf}`);
+            this.setBooks();
+        });
+    };
 
     render() {
         return (
@@ -28,9 +43,18 @@ class App extends React.Component {
                         </div>
                         <div className="list-books-content">
                             <div>
-                                <CurrentlyReading books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'currentlyreading')}/>
-                                <WantsToRead books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'wanttoread')}/>
-                                <Read books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'read')}/>
+                                <CurrentlyReading
+                                    books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'currentlyreading')}
+                                    onChangeShelf={this.updateShelf}
+                                />
+                                <WantsToRead
+                                    books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'wanttoread')}
+                                    onChangeShelf={this.updateShelf}
+                                />
+                                <Read
+                                    books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'read')}
+                                    onChangeShelf={this.updateShelf}
+                                />
                             </div>
                         </div>
                         <div className="open-search">
