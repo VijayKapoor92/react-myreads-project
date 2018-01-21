@@ -18,7 +18,12 @@ class BooksApp extends React.Component {
 
     state = {
         books: [],
-        isRendering: false
+        isLoading: false,
+        message: {
+            show: false,
+            title: null,
+            shelf: null
+        }
     };
 
     setBooks = () => {
@@ -39,21 +44,41 @@ class BooksApp extends React.Component {
     };
 
     updateShelfSearch = (book, shelf) => {
+        this.startLoader();
         BooksAPI.update(book, shelf).then(() => {
-            console.log(`O livro ${book.title} foi para a estante ${shelf}`);
             this.setBooks();
+            this.stopLoader();
+            this.showMessage(book, shelf);
+            setTimeout(() => {
+                this.hideMessage();
+            }, 2500);
         });
     };
 
-    reload = {
-        start(){
-            document.querySelector(".app").style.overflow = "hidden";
-            document.querySelector(".reload").style.display = "block";
-        },
-        stop(){
-            document.querySelector(".app").style.overflow = "scroll";
-            document.querySelector(".reload").style.display = "none";
-        }
+    startLoader = () => {
+        this.setState({isLoading: true});
+    };
+
+    stopLoader = () => {
+        this.setState({isLoading: false});
+    };
+
+    showMessage = (book, shelf) => {
+        this.setState({
+            message:{
+                show: true,
+                title: book.title,
+                shelf: shelf
+            }
+        });
+    };
+
+    hideMessage = () => {
+        this.setState({
+            message:{
+                show: false
+            }
+        })
     };
 
     static loader(){
@@ -65,6 +90,14 @@ class BooksApp extends React.Component {
         )
     };
 
+    static message(title, shelf) {
+        return(
+            <div className="message-box">
+                O livro <strong>{title}</strong> foi para a estante <strong>{shelf}</strong>
+            </div>
+        )
+    }
+
     static listBar(){
         return(
             <div className="list-books-title">
@@ -74,6 +107,9 @@ class BooksApp extends React.Component {
     };
 
     render() {
+
+        const { books, isLoading, message } = this.state;
+
         return (
             <div className="app">
                 <Route exact path='/' render={() => (
@@ -82,15 +118,15 @@ class BooksApp extends React.Component {
                         <div className="list-books-content">
                             <div>
                                 <CurrentlyReading
-                                    books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'currentlyreading')}
+                                    books={books.filter((book) => book.shelf.toLowerCase() === 'currentlyreading')}
                                     onChangeShelf={this.updateShelf}
                                 />
                                 <WantsToRead
-                                    books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'wanttoread')}
+                                    books={books.filter((book) => book.shelf.toLowerCase() === 'wanttoread')}
                                     onChangeShelf={this.updateShelf}
                                 />
                                 <Read
-                                    books={this.state.books.filter((book) => book.shelf.toLowerCase() === 'read')}
+                                    books={books.filter((book) => book.shelf.toLowerCase() === 'read')}
                                     onChangeShelf={this.updateShelf}
                                 />
                             </div>
@@ -102,8 +138,12 @@ class BooksApp extends React.Component {
                 )} />
                 <Route path='/search' render={() => (
                     <div>
-                        {(this.state.isRendering &&
+                        {(isLoading &&
                             BooksApp.loader()
+                        )}
+                        {(message.show &&
+                            // console.log(`Title / Shelf: ${message.title} / ${message.shelf}`)
+                            BooksApp.message(message.title, message.shelf)
                         )}
                         <Search
                             books={this.state.books}
