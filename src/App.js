@@ -2,18 +2,23 @@ import React from 'react'
 import CurrentlyReading from './CurrentlyReading'
 import WantsToRead from './WantsToRead'
 import Read from './Read'
+import Search from './Search'
 import { Route, Link } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
 
-class App extends React.Component {
+//TODO: onChange no Search
+//TODO: resgatar isRendering do onChange do Search para comecar ou parar
+
+class BooksApp extends React.Component {
 
     componentDidMount(){
         this.setBooks();
     }
 
     state = {
-      books : []
+        books: [],
+        isRendering: false
     };
 
     setBooks = () => {
@@ -33,14 +38,47 @@ class App extends React.Component {
         });
     };
 
+    updateShelfSearch = (book, shelf) => {
+        BooksAPI.update(book, shelf).then(() => {
+            console.log(`O livro ${book.title} foi para a estante ${shelf}`);
+            this.setBooks();
+        });
+    };
+
+    reload = {
+        start(){
+            document.querySelector(".app").style.overflow = "hidden";
+            document.querySelector(".reload").style.display = "block";
+        },
+        stop(){
+            document.querySelector(".app").style.overflow = "scroll";
+            document.querySelector(".reload").style.display = "none";
+        }
+    };
+
+    static loader(){
+        return(
+            <div>
+                <div className="backdrop" />
+                <div className="loader" />
+            </div>
+        )
+    };
+
+    static listBar(){
+        return(
+            <div className="list-books-title">
+                <h1>MyReads</h1>
+            </div>
+        )
+    };
+
     render() {
         return (
             <div className="app">
                 <Route exact path='/' render={() => (
                     <div className="list-books">
-                        <div className="list-books-title">
-                            <h1>MyReads</h1>
-                        </div>
+                        {BooksApp.listBar()}
                         <div className="list-books-content">
                             <div>
                                 <CurrentlyReading
@@ -63,16 +101,14 @@ class App extends React.Component {
                     </div>
                 )} />
                 <Route path='/search' render={() => (
-                    <div className="search-books">
-                        <div className="search-books-bar">
-                            <Link className="close-search" to="/" />
-                            <div className="search-books-input-wrapper">
-                                <input type="text" placeholder="Search by title or author"/>
-                            </div>
-                        </div>
-                        <div className="search-books-results">
-                            <ol className="books-grid"></ol>
-                        </div>
+                    <div>
+                        {(this.state.isRendering &&
+                            BooksApp.loader()
+                        )}
+                        <Search
+                            books={this.state.books}
+                            onChangeShelf={this.updateShelfSearch}
+                        />
                     </div>
                 )} />
             </div>
@@ -80,4 +116,4 @@ class App extends React.Component {
     }
 }
 
-export default App
+export default BooksApp
